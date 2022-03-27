@@ -15,4 +15,3 @@ or, it it gives a module error for some reason,
 python metrics {arg}
 ```
 Where the arg should be mem for memory or cpu for CPU.
-You can check the source code in main.py
