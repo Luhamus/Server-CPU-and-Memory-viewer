@@ -1,0 +1,87 @@
+#! /usr/bin/python
+
+import sys
+import os
+import psutil
+from psutil._common import bytes2human
+
+def getCpuInfo():
+    print("\tCPU\n==========================\n")
+    
+    #cpu name
+    print(os.system("cat /proc/cpuinfo | grep \"model name\" | head -n1 | cut -c 14- 2>&-"))
+    
+    
+    #cpu Cores
+    print("\nNumber of physical cores: " + str(psutil.cpu_count(logical=False)))
+    print("Number of physical Logical CPU's: " + str(psutil.cpu_count(logical=True)))
+    
+    
+    #Load averages
+    print("\nAverage cpu load in last x minutes")
+    print(" 1    5    15")
+    print("---- ---- ----")
+    
+    loadavg = psutil.getloadavg()
+    for el in loadavg: 
+        print(str(round(el,2))+" ", end="")
+    print("\n")
+    
+    
+    #Time spend on what
+    print("Time that CPU has spend on given mode (sec)")
+    times = psutil.cpu_times()
+    
+    for el in times._fields: print(el+"     ",end="")
+    print("\n----     ----     ------     ----     ------     ---     -------     -----     -----     ----------")
+    for el in times:
+        print(el,"   ",end="")
+    print("\n")
+    
+    
+    #Cpu usage % per core
+    print("CPU usage (%) per core")
+    for nr, el in enumerate(psutil.cpu_percent(interval=1, percpu=True), start=1):
+        print(nr,"-",el)
+
+
+
+def getMemInfo():
+    print("\tMemory\n==========================\n")
+
+
+    print("Virtual Memory\n---------------")
+    mem = psutil.virtual_memory()
+    mem_labels = mem._fields
+    for el in range(len(mem)):
+        value = mem[el]
+        if mem_labels[el] != "percent":
+            value = bytes2human(value)
+        else:
+            value = str(round(mem[el],2))+"%"
+        print(mem_labels[el],":",value)
+
+    
+    print("\nSwap\n--------------")
+    swap = psutil.swap_memory()
+    swap_labels = swap._fields
+    for el in range(len(swap)):
+        value = swap[el]
+        if swap_labels[el] != "percent":
+            value = bytes2human(value)
+        else:
+            value = str(round(swap[el],2))+"%"
+        print(swap_labels[el],":",value)
+    
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print("You have to ive a argument, either \"mem\" or \"cpu\"")
+    
+    elif sys.argv[1] == "cpu":
+        getCpuInfo()
+    elif sys.argv[1] == "mem":
+        getMemInfo()
+    else:
+        print("Wrong usage of the script")
+        print("Give one argument, either \"mem\" or \"cpu\"")
